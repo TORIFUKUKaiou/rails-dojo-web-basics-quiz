@@ -142,9 +142,9 @@ const questions = [
   {
     category: 'GET / POST',
     text: 'POSTをよく使う場面はどれですか。',
-    choices: ['フォームの入力内容を送る', '記事一覧を見る', '商品詳細を見る', '検索結果を見る'],
+    choices: ['登録フォームの入力内容を送る', '記事一覧を見る', '商品詳細を見る', '検索結果を見る'],
     answer: [0],
-    explanation: 'POSTは登録、投稿、ログインなど、データを送る場面でよく使います。',
+    explanation: 'POSTは登録、投稿、ログインなど、入力したデータを送る場面でよく使います。',
   },
   {
     category: 'GET / POST',
@@ -190,21 +190,24 @@ const questions = [
   },
   {
     category: 'フォーム',
-    text: '`<form action="/search" method="get">` の送信先はどれですか。',
+    text: '次のフォームの送信先はどれですか。',
+    code: '<form action="/search" method="get">\n  <input type="text" name="keyword">\n</form>',
     choices: ['/search', 'get', 'form', 'keyword'],
     answer: [0],
     explanation: 'action はフォームの送信先です。',
   },
   {
     category: 'フォーム',
-    text: '`<form action="/search" method="get">` の送信方法はどれですか。',
+    text: '次のフォームの送信方法はどれですか。',
+    code: '<form action="/search" method="get">\n  <input type="text" name="keyword">\n</form>',
     choices: ['GET', 'POST', '/search', 'keyword'],
     answer: [0],
     explanation: 'method="get" なのでGETで送信します。',
   },
   {
     category: 'フォーム',
-    text: '`<input type="text" name="keyword">` の入力欄の名前はどれですか。',
+    text: '次のフォームの入力欄の名前はどれですか。',
+    code: '<form action="/search" method="get">\n  <input type="text" name="keyword">\n</form>',
     choices: ['keyword', 'text', 'input', 'search'],
     answer: [0],
     explanation: 'name は、サーバへ送るときの項目名です。',
@@ -331,7 +334,7 @@ const questions = [
     code: '<form action="/books" method="get">\n  <input type="text" name="author">\n</form>\n\nget "/books", to: "books#index"\npost "/books", to: "books#create"',
     choices: ['books#index', 'books#create', 'articles#index', 'authors#create'],
     answer: [0],
-    explanation: 'GETで /books に送信するため、get "/books" のルーティングに一致します。',
+    explanation: 'GETで /books に送信するため、get "/books" のルーティングに一致します。name="author" は送るデータの名前です。どの処理につながるかは、method="get" と action="/books" を見ます。',
   },
   {
     category: '総合問題',
@@ -436,6 +439,17 @@ function arraysEqual(a, b) {
   return sortedA.every((value, index) => value === sortedB[index]);
 }
 
+function shuffleChoices(choices) {
+  const shuffled = choices.map((text, originalIndex) => ({ text, originalIndex }));
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+
+  return shuffled;
+}
+
 function getSelectedIndexes() {
   return [...elements.choices.querySelectorAll('input:checked')].map((input) => Number(input.value));
 }
@@ -465,12 +479,13 @@ function renderQuestion() {
   }
 
   const inputType = question.answer.length === 1 ? 'radio' : 'checkbox';
-  elements.choices.innerHTML = question.choices
-    .map((choice, index) => {
+  const shuffledChoices = shuffleChoices(question.choices);
+  elements.choices.innerHTML = shuffledChoices
+    .map((choice) => {
       return `
         <label class="choice">
-          <input type="${inputType}" name="choice" value="${index}">
-          <span>${escapeHtml(choice)}</span>
+          <input type="${inputType}" name="choice" value="${choice.originalIndex}">
+          <span>${escapeHtml(choice.text)}</span>
         </label>
       `;
     })
@@ -503,13 +518,14 @@ function submitAnswer() {
     });
   }
 
-  [...elements.choices.querySelectorAll('.choice')].forEach((label, index) => {
+  [...elements.choices.querySelectorAll('.choice')].forEach((label) => {
     const input = label.querySelector('input');
+    const originalIndex = Number(input.value);
     input.disabled = true;
 
-    if (question.answer.includes(index)) {
+    if (question.answer.includes(originalIndex)) {
       label.classList.add('correct');
-    } else if (selected.includes(index)) {
+    } else if (selected.includes(originalIndex)) {
       label.classList.add('incorrect');
     }
   });
