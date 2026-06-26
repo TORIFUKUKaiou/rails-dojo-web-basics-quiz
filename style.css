@@ -331,6 +331,18 @@ button:disabled {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.review-answer {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.review-explanation {
+  display: inline-block;
+  margin-top: 4px;
+}
+
 @keyframes twinkle {
   0%,
   100% {

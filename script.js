@@ -37,9 +37,9 @@ const questions = [
   {
     category: 'ブラウザとサーバ',
     text: 'ブラウザ側の動きとして正しいものをすべて選んでください。',
-    choices: ['URLを入力する', 'リクエストを送る', 'レスポンスを受け取る', 'Railsのルーティングを実行する'],
+    choices: ['URLをもとにアクセス先を決める', 'リクエストを送る', 'レスポンスを受け取る', 'Railsのルーティングを実行する'],
     answer: [0, 1, 2],
-    explanation: 'URL入力、リクエスト送信、レスポンス受信はブラウザ側の動きです。Railsのルーティングはサーバ側です。',
+    explanation: 'URLをもとにアクセス先を決めること、リクエスト送信、レスポンス受信はブラウザ側の動きです。Railsのルーティングはサーバ側です。',
   },
   {
     category: 'リクエストとレスポンス',
@@ -570,10 +570,13 @@ function submitAnswer() {
   if (isCorrect) {
     state.score += 1;
   } else {
+    const answerLabels = question.answer.map((index) => question.choices[index]).join(' / ');
     state.incorrect.push({
       number: state.currentIndex + 1,
       text: question.text,
       category: question.category,
+      answer: answerLabels,
+      explanation: question.explanation,
     });
   }
 
@@ -616,9 +619,9 @@ function showFinish() {
     return;
   }
 
-  elements.finishLead.textContent = '間違えた問題をもう一度確認しましょう。解説の言葉を、Railsのルーティング学習につなげます。';
+  elements.finishLead.textContent = '間違えた問題をもう一度確認しましょう。';
   elements.reviewList.innerHTML = state.incorrect
-    .map((item) => `<div class="review-item"><strong>Q${item.number} ${escapeHtml(item.category)}</strong><br>${escapeHtml(item.text).replaceAll('`', '')}</div>`)
+    .map((item) => `<div class="review-item"><strong>Q${item.number} ${escapeHtml(item.category)}</strong><br>${escapeHtml(item.text).replaceAll('`', '')}<br><span class="review-answer">正解：${escapeHtml(item.answer).replaceAll('`', '')}</span><br><span class="review-explanation">解説：${escapeHtml(item.explanation).replaceAll('`', '')}</span></div>`)
     .join('');
 }
 
